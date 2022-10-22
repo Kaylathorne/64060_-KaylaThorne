@@ -1,0 +1,76 @@
+---
+title: "Assignment 3"
+output: html_document
+date: "2022-10-22"
+---
+
+```{r}
+bank = read.csv("~/downloads/UniversalBank.csv")
+bank$Personal.Loan = as.factor(bank$Personal.Loan)
+bank$Online = as.factor(bank$Online)
+bank$CreditCard = as.factor(bank$CreditCard)
+set.seed(1)
+train.index <- sample(row.names(bank), 0.6*dim(bank)[1])  
+test.index <- setdiff(row.names(bank), train.index) 
+train.df <- bank[train.index, ]
+test.df <- bank[test.index, ]
+train <- bank[train.index, ]
+test = bank[train.index,]
+```
+```{r}
+melted.bank = melt(train,id=c("CreditCard","Personal.Loan"),variable= "Online")
+recast.bank=dcast(melted.bank,CreditCard+Personal.Loan~Online)
+recast.bank[,c(1:2,14)]
+```
+```{r}
+melted.bankc1 = melt(train,id=c("Personal.Loan"),variable = "Online")
+```
+
+```{r}
+melted.bankc2 = melt(train,id=c("CreditCard"),variable = "Online")
+```
+
+```{r}
+recast.bankc1=dcast(melted.bankc1,Personal.Loan~Online)
+recast.bankc2=dcast(melted.bankc2,CreditCard~Online)
+Loanline=recast.bankc1[,c(1,13)]
+LoanCC = recast.bankc2[,c(1,14)]
+
+Loanline
+```
+
+```{r}
+LoanCC
+```
+```{r}
+table(train[,c(14,10)])
+```
+
+```{r}
+table(train[,c(13,10)])
+```
+
+```{r}
+table(train[,c(10)])
+```
+
+#i. 77/(77+198)=28% 
+#ii. 166/(166+109)= 60.3%
+#iii.275/(275+2725)=9.2%
+#iv. 801/(801+1924)=29.4%
+#v. 1588/(1588+1137) = 58.3%
+#vi. 2725/(2725+275) = 90.8%
+
+```{r}
+((77/(77+198))*(166/(166+109))*(275/(275+2725)))/(((77/(77+198))*(166/(166+109))*(275/(275+2725)))+((801/(801+1924))*(1588/(1588+1137))*2725/(2725+275)))
+```
+
+```{r}
+naive.train = train.df[,c(10,13:14)]
+naive.test = test.df[,c(10,13:14)]
+naivebayes = naiveBayes(Personal.Loan~.,data=naive.train)
+naivebayes
+```
+
+
+#has same ouput (.280)(.603)(.09)/(.280.603.09+.29.58.908) = .09, as listed above.
