@@ -1,0 +1,63 @@
+---
+title: "Homework 4"
+output: html_document
+date: "2022-10-31"
+---
+
+```{r}
+p<-read.csv("~/downloads/Pharmaceuticals.csv",header = TRUE)
+head(p)
+```
+```{r}
+p1 <- p[,3:11]
+head(p1)
+ps <- scale(p1)
+head(ps)
+```
+```{r}
+wss <- (nrow(ps)-1)*sum(apply(ps,2,var))
+wss
+```
+```{r}
+for (i in 2:15) wss[i] <- sum(kmeans(ps,centers=i)$withinss)
+wss
+```
+```{r}
+plot(1:15, wss, type="b", xlab="Number of Clusters",ylab="Within groups sum of squares")
+```
+```{r}
+fit <- kmeans(ps, 5)
+```
+```{r}
+aggregate(ps,by=list(fit$cluster),FUN=mean)
+```
+```{r}
+ps1 <- data.frame(ps, fit$cluster)
+ps1
+```
+```{r}
+library(cluster)
+clusplot(ps, fit$cluster, color=TRUE, shade=TRUE, labels=2, lines=0)
+```
+#b
+#Cluster 1 - Row 1,3,4,5,19,20
+#Cluster 2 - Row 2,6,18
+#Cluster 3 - Row 11,13,15,17
+#Cluster 4 - Row 7,10,16,21
+#Cluster 5 - Row 8,9,12,14
+
+#Cluster 1 has lowest Leverage.
+#Cluster 2 has highest PE ratio, lowest ROE, lowest ROA, lowest Asset Turnover, lowest Net Profit Margin
+#Cluster 3 has highest Market Cap, highest ROE, highest ROA, highest Asset Turnover
+#Cluster 4 has highest Net Profit Margin, lowest Beta, lowest PE Ratio, lowest Rev growth.
+#Cluster 5 has highest Beta, highest Leverage, highest Rev growth and lowest Market Cap.
+
+#c
+#there is a pattern in clusters, it is in view of media recommendation variable. Cluster 3 does not have any sell media recommendation. Cluster 2 has mostly hold recommendation while cluster 4 also has mostly hold recommendation
+
+#d
+#Cluster 1 - Lowest Leverage cluster
+#Cluster 2 - High PE ratio, Low ROE, ROA, Asset Turnover, Net Profit Margin Cluster
+#Cluster 3 - High Market Cap, ROE, ROA, Asset Turnover cluster
+#Cluster 4 - High Net Profit Margin, Low Beta, PE Ratio, Rev growth cluster
+#Cluster 5 - High Beta, Leverage, Rev growth and Low Market Cap cluster
