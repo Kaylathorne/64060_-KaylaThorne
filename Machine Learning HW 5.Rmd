@@ -1,0 +1,79 @@
+---
+title: "Homework 5"
+output: html_document
+date: "2022-11-21"
+---
+
+```{r}
+library(knitr)
+library(stats)
+library(cluster)
+```
+```{r}
+cereals<-read.csv("~/documents/Cereals.csv")
+```
+
+```{r}
+numericaldata <- data.frame(cereals[,4:16])
+OmitMissing <- na.omit(numericaldata)
+Normalise <- scale(OmitMissing)
+```
+
+```{r}
+Distance <- dist(Normalise, method = "euclidean")
+Clustering_heirarchial <- hclust(Distance, method = "complete")
+plot(Clustering_heirarchial)
+```
+```{r}
+round(Clustering_heirarchial$height, 3)
+```
+```{r}
+plot(Clustering_heirarchial)
+rect.hclust(Clustering_heirarchial, k = 4, border = "lightgreen")
+```
+```{r}
+singleCH <- agnes(Normalise, method = "single")
+completeCH <- agnes(Normalise, method = "complete")
+averageCH <- agnes(Normalise, method = "average")
+wardCH <- agnes(Normalise, method = "ward")
+print(singleCH$ac)
+print(completeCH$ac)
+print(averageCH$ac)
+print(wardCH$ac)
+pltree(wardCH, cex = 0.6, hang = -1, main = 'Dendrogram of agnes-Ward')
+cutree(wardCH, k = 4)
+```
+As we can see from this ward is the best method to use.
+```{r}
+HCuster1 <- hclust(Distance, method = "ward.D2")
+subgrp <- cutree(HCuster1, k = 4)
+table(subgrp)
+```
+```{r}
+library("factoextra")
+cereals <- as.data.frame(cbind(Normalise, subgrp))
+fviz_cluster(list(data = Normalise, cluster = subgrp))
+```
+The optimal number of clusters is four.
+```{r}
+Newcereals <- numericaldata
+Newcereals_omit <- na.omit(Newcereals)
+Clust <- cbind(Newcereals_omit, subgrp)
+Clust[Clust$subgrp==1,]
+```
+```{r}
+mean(Clust[Clust$subgrp==1, "rating"])
+mean(Clust[Clust$subgrp==2, "rating"])
+mean(Clust[Clust$subgrp==3, "rating"])
+mean(Clust[Clust$subgrp==4, "rating"])
+```
+```{r}
+hc_diana <- diana(cereals)
+hc_diana$dc
+pltree(hc_diana, cex = 0.5, hang = -1, main = 'Dendrogram of diana')
+```
+```{r}
+Newcereals_omit$rating > 65
+```
+
+#There are 5 cereals that score above a 65. These are the five that should be in schools. The cereals included are 1, 4, 64, 65, 66.
