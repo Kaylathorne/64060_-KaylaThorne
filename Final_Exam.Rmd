@@ -1,7 +1,7 @@
 ---
 title: "Untitled"
-author: "Capstone 2"
-date: "2022-11-29"
+author: " 2"
+dFinalate: "2022-11-29"
 output:
   pdf_document: default
   html_document: default
