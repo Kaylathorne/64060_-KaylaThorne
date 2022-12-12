@@ -1,0 +1,119 @@
+---
+title: "Untitled"
+author: "Capstone 2"
+date: "2022-11-29"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+df<-read.csv("~/downloads/BreastCancer.csv")
+```
+#Decision Tree
+```{r}
+set.seed(1234)
+```
+```{r}
+ind<-sample(2,nrow(df),replace = TRUE, prob = c(0.8,0.2))
+tdata<-sample(1:nrow(df),(nrow(df)*4/5))
+Train<-df[tdata,]
+NROW(Train)
+vdata<--tdata
+Test<-df[vdata,]
+NROW(Test)
+```
+
+```{r}
+tree<-ctree(Survival.Months ~ Age + Tumor.Size + Reginol.Node.Positive + Regional.Node.Examined, data = df)
+tree
+```
+```{r}
+plot(tree)
+```
+```{r}
+DTPrediction<-predict(tree, Test, type= 'response')
+DTPrediction
+```
+```{r}
+library("tree")
+DecisionTree<-tree(Survival.Months ~ Age + Tumor.Size + Reginol.Node.Positive + Regional.Node.Examined,Train)
+plot(DecisionTree)
+text(DecisionTree,pretty=0)
+p<-predict(DecisionTree,Test,type= "tree")
+p
+```
+
+
+#Lasso Regression
+```{r}
+y<-df$Survival.Months
+```
+```{r}
+x<-data.matrix(df[,c("Tumor.Size", "Age", "Regional.Node.Examined", "Reginol.Node.Positive")])
+```
+```{r}
+cv_model<-cv.glmnet(x,y,alpha=1)
+```
+
+```{r}
+best_lambda<-cv_model$lambda.min
+best_lambda
+```
+```{r}
+plot(cv_model)
+```
+```{r}
+best_model<-glmnet(x, y, alpha = 1, lambda = best_lambda)
+coef(best_model)
+```
+
+#LM Model
+```{r}
+model <- lm(Survival.Months ~ Age + Tumor.Size + Reginol.Node.Positive + Regional.Node.Examined, data = df)
+summary(model)
+```
+```{r}
+ols_step_all_possible(model)
+```
+```{r}
+k <- ols_step_all_possible(model)
+plot(k)
+```
+
+```{r}
+prediction<-predict(model, newdata = Test)
+prediction
+```
+
+```{r}
+Table<-cbind(DTPrediction,prediction,LassoPredicted)
+```
+```{r}
+Average<-rowMeans(Table, na.rm = TRUE)
+Average
+```
+```{r}
+Avg.DT.LR.LM<-cbind(Table,Average)
+Avg.DT.LR.LM
+```
+# Decision Tree Absolute Difference
+```{r}
+diff1<- abs(Test$Survival.Months-DTPrediction)
+percentdiff1<- (diff1/Test$Survival.Months)*100
+MSE1<-sum(diff1^2)/804
+```
+#Lasso Regression Absolute Difference
+```{r}
+diff2<- abs(Test$Survival.Months-LassoPredicted)
+percentdiff2<- (diff2/Test$Survival.Months)*100
+MSE2<-sum(diff2^2)/804
+```
+#Linear Regression Absolute Difference
+```{r}
+diff3<- abs(Test$Survival.Months-prediction)
+percentdiff3<- (diff3/Test$Survival.Months)*100
+MSE3<-sum(diff3^2)/804
+```
+
+
